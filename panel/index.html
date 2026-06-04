@@ -1,0 +1,428 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>AED Subtitles</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar-card">
+      <div class="topbar-main">
+        <div class="topbar-title-wrap">
+          <h1 class="topbar-title">AED Subtitles</h1>
+          <span id="summaryVersion" class="topbar-version">1.0.134</span>
+        </div>
+        <div id="liveStatus" class="live-status topbar-status">live_status 1.0.134 | ok | model turbo | idle</div>
+        <div class="topbar-actions">
+          <button id="btnScanSourcesHero" class="hero-secondary-button topbar-button" type="button">Scan</button>
+          <button id="btnFullRun" class="run-hero-button topbar-button" type="button">Run</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel-card sources-card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Timeline Sources</div>
+          <div class="card-subtitle">Choose which audio layers feed transcription. By default all file-backed layers are selected.</div>
+        </div>
+        <button id="btnScanSources" type="button">Rescan</button>
+      </div>
+      <div id="sourcesList" class="sources-list">Open an active comp and press Scan.</div>
+      <div class="workflow-steps" aria-label="Caption workflow">
+        <span>1 Generate</span>
+        <span>2 Review</span>
+        <span>3 Style</span>
+        <span>4 Apply</span>
+      </div>
+      <div class="sources-note">Subtitles JSON is managed automatically: <code>tmp/subtitles.json</code></div>
+    </section>
+
+    <section class="panel-card transcript-card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Review Captions</div>
+          <div class="card-subtitle">Transcript-linked caption rows, ready to check before styling or applying.</div>
+        </div>
+        <div class="caption-export-actions">
+          <button id="btnRefreshTimings" type="button">Retiming</button>
+          <button id="btnApplyChangedCaptions" type="button">Apply Changed</button>
+          <button id="btnCopyCaptions" type="button">Copy</button>
+          <button id="btnExportSrt" type="button">SRT</button>
+          <button id="btnExportVtt" type="button">VTT</button>
+        </div>
+      </div>
+      <div class="reference-text-panel">
+        <label for="referenceText" class="reference-text-label">Reference Text</label>
+        <textarea
+          id="referenceText"
+          class="reference-text-input"
+          rows="4"
+          placeholder="Paste the exact words that should appear in captions. Whisper keeps timing; this text replaces recognition mistakes."
+        ></textarea>
+        <div id="referenceTextMeta" class="reference-text-meta">Optional: paste known-correct script, Hinglish line, quote, or lyrics-style spoken text.</div>
+      </div>
+      <div class="word-rules-panel">
+        <div class="word-rules-head">
+          <div>
+            <div class="word-rules-title">Word Rules</div>
+            <div class="word-rules-note">Highlight exact words or phrases before applying captions.</div>
+          </div>
+          <button id="btnAddWordRule" type="button">+ Rule</button>
+        </div>
+        <div id="wordRulesList" class="word-rules-list"></div>
+        <div id="wordRulesMeta" class="word-rules-meta">No word rules yet.</div>
+      </div>
+      <div id="transcriptReviewList" class="transcript-review-list"></div>
+      <div id="transcriptReviewMeta" class="transcript-review-meta">Current audio has not been transcribed yet.</div>
+    </section>
+
+    <section class="panel-card style-card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Caption Style</div>
+          <div class="card-subtitle">Start from the cleaner reference-based set. Legacy presets stay in the engine, not in your way.</div>
+        </div>
+      </div>
+
+      <div class="field-grid field-grid-primary">
+        <label>Preset
+          <div id="presetPicker" class="preset-picker">
+            <button id="presetPickerButton" class="font-picker-button" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="font-picker-button-copy">
+                <span id="presetPickerLabel" class="font-picker-label">Bold: Yellow highlight</span>
+                <span id="presetPickerPreview" class="font-picker-preview">Active word highlight with softened shadow.</span>
+              </span>
+              <span class="font-picker-tools">
+                <span class="font-picker-caret">▾</span>
+              </span>
+            </button>
+            <div id="presetPickerMenu" class="font-picker-menu hidden" role="listbox" aria-label="Preset list"></div>
+          </div>
+          <select id="preset" class="native-hidden-select">
+            <option value="classic_clean">Classic</option>
+            <option value="static_marker_karaoke">Static marker karaoke</option>
+            <option value="clean_paragraph">Clean: Paragraph</option>
+            <option value="modern_yellow">Modern yellow</option>
+            <option value="bold_yellow_shadow" selected>Bold: Yellow highlight</option>
+            <option value="reels_bold_yellow">Reels: Bold yellow</option>
+            <option value="bold_two_words">Bold: Two words</option>
+          </select>
+        </label>
+
+        <label>Font
+          <div id="fontPicker" class="font-picker">
+            <button id="fontPickerButton" class="font-picker-button" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="font-picker-button-copy">
+                <span id="fontPickerLabel" class="font-picker-label">Preset default</span>
+                <span id="fontPickerPreview" class="font-picker-preview">Aa Бб 123</span>
+              </span>
+              <span class="font-picker-tools">
+                <span id="fontPickerSpinner" class="font-picker-spinner hidden" aria-hidden="true"></span>
+                <span class="font-picker-caret">▾</span>
+              </span>
+            </button>
+            <div id="fontPickerMenu" class="font-picker-menu hidden" role="listbox" aria-label="Font list"></div>
+          </div>
+          <select id="fontSelect" class="native-hidden-select">
+            <option value="">Preset default</option>
+          </select>
+        </label>
+
+        <label>Output Mode
+          <div id="outputModePicker" class="preset-picker">
+            <button id="outputModePickerButton" class="font-picker-button" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="font-picker-button-copy">
+                <span id="outputModePickerLabel" class="font-picker-label">Layers</span>
+                <span id="outputModePickerPreview" class="font-picker-preview">Separate subtitle layers for each caption item.</span>
+              </span>
+              <span class="font-picker-tools">
+                <span class="font-picker-caret">▾</span>
+              </span>
+            </button>
+            <div id="outputModePickerMenu" class="font-picker-menu hidden" role="listbox" aria-label="Output mode list"></div>
+          </div>
+          <select id="outputMode" class="native-hidden-select">
+            <option value="layers">layers</option>
+            <option value="single_keys">single_keys</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="outputModeHint" class="mode-hint">`layers` creates separate subtitle layers. `single_keys` keeps one text layer and animates it with keyframes.</div>
+
+      <div class="style-workbench">
+        <div class="style-preview-panel panel-subcard compact-primary-preview single-preview-card">
+          <div class="style-preview-head">
+            <div>
+              <div class="style-preview-title">Caption Preview</div>
+              <div class="style-colors-note">Portrait caption canvas with active-word styling and safe margins.</div>
+            </div>
+            <div class="layout-preview-head-actions">
+              <div id="stylePreviewModeBadge" class="style-preview-mode-badge">layers</div>
+              <button id="btnShufflePreview" type="button">New Quote</button>
+            </div>
+          </div>
+          <div id="stylePreviewStage" class="style-preview-stage">
+            <div id="stylePreviewCaption" class="style-preview-caption">
+              <div id="stylePreviewText" class="style-preview-text">
+                <span class="style-preview-line">
+                  <span class="style-preview-word">This</span><span class="style-preview-word is-active">changes</span><span class="style-preview-word is-future">everything</span>
+                </span>
+                <span class="style-preview-line">
+                  <span class="style-preview-word is-future">for</span><span class="style-preview-word is-future">us.</span>
+                </span>
+              </div>
+              <span class="style-preview-handle style-preview-handle-scale style-preview-handle-top-left" data-preview-handle="scale" title="Scale block without changing line breaks"></span>
+              <span class="style-preview-handle style-preview-handle-scale style-preview-handle-top-right" data-preview-handle="scale" title="Scale block without changing line breaks"></span>
+              <span class="style-preview-handle style-preview-handle-scale style-preview-handle-bottom-left" data-preview-handle="scale" title="Scale block without changing line breaks"></span>
+              <span class="style-preview-handle style-preview-handle-scale style-preview-handle-bottom-right" data-preview-handle="scale" title="Scale block without changing line breaks"></span>
+              <span class="style-preview-handle style-preview-handle-left" data-preview-handle="width" data-preview-edge="left" title="Resize caption block"></span>
+              <span class="style-preview-handle style-preview-handle-right" data-preview-handle="width" data-preview-edge="right" title="Resize caption block"></span>
+              <span class="style-preview-handle style-preview-handle-padding" data-preview-handle="padding" title="Adjust background padding"></span>
+            </div>
+          </div>
+          <div class="style-preview-footer single-preview-footer">
+            <div class="layout-preview-stats single-preview-stats">
+              <div class="layout-preview-stat single-preview-stat">
+                <span>Chars</span>
+                <strong id="layoutPreviewChars">42</strong>
+              </div>
+              <div class="layout-preview-stat single-preview-stat">
+                <span>Lines</span>
+                <strong id="layoutPreviewLines">2</strong>
+              </div>
+              <div class="layout-preview-stat single-preview-stat">
+                <span>Offset Y</span>
+                <strong id="layoutPreviewMargin">+180 px</strong>
+              </div>
+              <div class="layout-preview-stat single-preview-stat">
+                <span>Offset X</span>
+                <strong id="layoutPreviewOffsetX">0 px</strong>
+              </div>
+            </div>
+            <div id="stylePreviewMeta" class="style-preview-meta">Preview caption placement</div>
+          </div>
+        </div>
+
+        <div class="compact-style-grid">
+          <div class="style-controls-row panel-subcard">
+            <div class="style-colors-head">
+              <div>
+                <div class="style-colors-title">Colors</div>
+                <div class="style-colors-note">The four things you tweak most often.</div>
+              </div>
+            </div>
+            <div id="stylePalette" class="style-palette"></div>
+            <div class="style-color-tools">
+              <input id="styleColorPicker" class="accent-color-native" type="color" value="#1f7af2" />
+              <div id="styleColorTarget" class="style-color-target">Editing Accent</div>
+              <input id="styleColorHex" type="text" value="#1F7AF2" spellcheck="false" />
+              <button id="btnResetStyleColor" type="button">Preset</button>
+            </div>
+          </div>
+
+          <div class="style-tuning-panel panel-subcard compact-readability-card">
+            <div class="style-tuning-head">
+              <div>
+                <div class="style-tuning-title">Quick Controls</div>
+                <div class="style-colors-note">The main things that should stay right next to the preview.</div>
+              </div>
+              <button id="btnResetReadability" type="button">Reset</button>
+            </div>
+            <div class="style-tuning-grid style-tuning-grid-compact">
+              <label class="slider-field">
+                <span class="slider-field-head">
+                  <span>Size</span>
+                  <strong id="fontSizeControlValue" class="slider-value">48 px</strong>
+                </span>
+                <input id="fontSizeControl" class="slider-input" type="range" min="12" max="240" step="1" value="48" data-output-id="fontSizeControlValue" data-unit=" px" />
+              </label>
+              <label class="slider-field">
+                <span class="slider-field-head">
+                  <span>Stroke Width</span>
+                  <strong id="strokeWidthControlValue" class="slider-value">0 px</strong>
+                </span>
+                <input id="strokeWidthControl" class="slider-input" type="range" min="0" max="24" step="1" value="0" data-output-id="strokeWidthControlValue" data-unit=" px" />
+              </label>
+              <label class="slider-field">
+                <span class="slider-field-head">
+                  <span>Max Chars</span>
+                  <strong id="maxCharsValue" class="slider-value">42</strong>
+                </span>
+                <input id="maxChars" class="slider-input" type="range" min="16" max="72" step="1" value="42" data-output-id="maxCharsValue" />
+              </label>
+              <label class="slider-field">
+                <span class="slider-field-head">
+                  <span>Max Lines</span>
+                  <strong id="maxLinesControlValue" class="slider-value">2</strong>
+                </span>
+                <input id="maxLinesControl" class="slider-input" type="range" min="1" max="4" step="1" value="2" data-output-id="maxLinesControlValue" />
+              </label>
+              <label class="slider-field">
+                <span class="slider-field-head">
+                  <span>Block Width</span>
+                  <strong id="blockWidthControlValue" class="slider-value">900 px</strong>
+                </span>
+                <input id="blockWidthControl" class="slider-input" type="range" min="180" max="900" step="10" value="900" data-output-id="blockWidthControlValue" data-unit=" px" />
+              </label>
+              <label class="slider-field">
+                <span class="slider-field-head">
+                  <span>Block Scale</span>
+                  <strong id="blockScaleControlValue" class="slider-value">91%</strong>
+                </span>
+                <input id="blockScaleControl" class="slider-input" type="range" min="40" max="180" step="1" value="91" data-output-id="blockScaleControlValue" data-unit="%" />
+              </label>
+              <label class="slider-field">
+                <span class="slider-field-head">
+                  <span>Offset Y</span>
+                  <strong id="marginYValue" class="slider-value">+224 px</strong>
+                </span>
+                <input id="marginY" class="slider-input" type="range" min="-720" max="720" step="2" value="224" data-output-id="marginYValue" data-unit=" signed-px" />
+              </label>
+              <label class="slider-field">
+                <span class="slider-field-head">
+                  <span>Offset X</span>
+                  <strong id="marginXValue" class="slider-value">0 px</strong>
+                </span>
+                <input id="marginX" class="slider-input" type="range" min="-540" max="540" step="2" value="0" data-output-id="marginXValue" data-unit=" signed-px" />
+              </label>
+            </div>
+            <div class="style-toggle-row">
+              <label class="check-control switch-control">
+                <input id="strokeEnabledControl" type="checkbox" checked />
+                <span>Stroke On</span>
+              </label>
+              <label class="check-control switch-control box-control-temporarily-hidden">
+                <input id="lineBoxEnabledControl" type="checkbox" />
+                <span>Backplate</span>
+              </label>
+              <label class="check-control switch-control box-control-temporarily-hidden">
+                <input id="boxEnabledControl" type="checkbox" />
+                <span>Box On</span>
+              </label>
+              <label class="check-control switch-control box-control-temporarily-hidden">
+                <input id="boxSmartControl" type="checkbox" />
+                <span>Smart Box</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <details class="advanced-style-details">
+          <summary>Advanced typography, language and engine</summary>
+          <div class="style-tuning-grid advanced-style-grid">
+            <label class="slider-field box-control-temporarily-hidden">
+              <span class="slider-field-head">
+                <span>Leading</span>
+                <strong id="leadingControlValue" class="slider-value">66 px</strong>
+              </span>
+              <input id="leadingControl" class="slider-input" type="range" min="12" max="280" step="1" value="66" data-output-id="leadingControlValue" data-unit=" px" />
+            </label>
+            <label class="slider-field box-control-temporarily-hidden">
+              <span class="slider-field-head">
+                <span>Tracking</span>
+                <strong id="trackingControlValue" class="slider-value">0</strong>
+              </span>
+              <input id="trackingControl" class="slider-input" type="range" min="-100" max="200" step="1" value="0" data-output-id="trackingControlValue" />
+            </label>
+            <label class="slider-field">
+              <span class="slider-field-head">
+                <span>Background Padding</span>
+                <strong id="boxPaddingControlValue" class="slider-value">18 px</strong>
+              </span>
+              <input id="boxPaddingControl" class="slider-input" type="range" min="0" max="80" step="1" value="18" data-output-id="boxPaddingControlValue" data-unit=" px" />
+            </label>
+            <label class="slider-field">
+              <span class="slider-field-head">
+                <span>Background Roundness</span>
+                <strong id="boxRoundnessControlValue" class="slider-value">0 px</strong>
+              </span>
+              <input id="boxRoundnessControl" class="slider-input" type="range" min="0" max="120" step="1" value="0" data-output-id="boxRoundnessControlValue" data-unit=" px" />
+            </label>
+            <label class="slider-field">
+              <span class="slider-field-head">
+                <span>Background Opacity</span>
+                <strong id="boxOpacityControlValue" class="slider-value">80%</strong>
+              </span>
+              <input id="boxOpacityControl" class="slider-input" type="range" min="0" max="100" step="1" value="80" data-output-id="boxOpacityControlValue" data-unit="%" />
+            </label>
+            <label class="check-control switch-control compact-advanced-toggle">
+              <input id="italicControl" type="checkbox" />
+              <span>Italic</span>
+            </label>
+            <label>Language
+              <div id="languagePicker" class="preset-picker">
+                <button id="languagePickerButton" class="font-picker-button" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="font-picker-button-copy">
+                    <span id="languagePickerLabel" class="font-picker-label">Auto</span>
+                    <span id="languagePickerPreview" class="font-picker-preview">Detect language from the audio automatically.</span>
+                  </span>
+                  <span class="font-picker-tools">
+                    <span class="font-picker-caret">▾</span>
+                  </span>
+                </button>
+                <div id="languagePickerMenu" class="font-picker-menu hidden" role="listbox" aria-label="Language list"></div>
+              </div>
+              <select id="language" class="native-hidden-select">
+                <option value="auto">auto</option>
+                <option value="en">en</option>
+                <option value="uk">uk</option>
+                <option value="es">es</option>
+                <option value="hinglish">hinglish</option>
+              </select>
+            </label>
+            <label>Recognition Model
+              <select id="model">
+                <option value="turbo" selected>Whisper Turbo: default</option>
+                <option value="small">Small: fast local</option>
+                <option value="medium">Medium: better accents</option>
+                <option value="large-v3">Large v3: most accurate</option>
+              </select>
+            </label>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <div class="card-head status-head">
+        <div>
+          <div class="card-title">Run Status</div>
+          <div class="card-subtitle">Progress, AE step state and the last backend log.</div>
+        </div>
+        <div class="status-actions">
+          <button id="btnNativeQa" type="button">Native QA</button>
+          <button id="btnCopyLog" type="button">Copy Log</button>
+        </div>
+      </div>
+
+      <div id="runProgress" class="run-progress hidden">
+        <div id="runProgressLabel" class="run-progress-label">Idle</div>
+        <div class="run-progress-track">
+          <div id="runProgressFill" class="run-progress-fill"></div>
+        </div>
+      </div>
+
+      <pre id="status">Ready.</pre>
+    </section>
+  </div>
+
+  <div id="runOverlay" class="run-overlay hidden" aria-hidden="true">
+    <div class="run-overlay-card">
+      <div class="run-overlay-hero" aria-hidden="true">
+        <div class="pixel-face">
+          <div class="pixel-eye pixel-eye-left"></div>
+          <div class="pixel-eye pixel-eye-right"></div>
+          <div class="pixel-mouth"></div>
+        </div>
+      </div>
+      <div id="runOverlayText" class="run-overlay-text">Поглинання звуків вже відбувається!</div>
+      <div id="runOverlayQuote" class="run-overlay-quote">"Випити чаю НЕ шкодить вашому здоровʼю!"</div>
+    </div>
+  </div>
+
+  <script src="./main.js"></script>
+</body>
+</html>

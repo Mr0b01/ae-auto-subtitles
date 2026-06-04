@@ -1,0 +1,31 @@
+.DS_Store
+._*
+
+# Local Python/runtime state
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Build and release outputs
+build/
+dist/
+
+# Runtime/test artifacts
+tmp/
+*.log
+test_out.log
+test_err.log
+
+# OMX/session state
+.omx/
+
+# Legacy root scratch copy; production JSX lives in scripts/create_subtitles.jsx
+/create_subtitles.jsx
+
+# CEP dev symlinks created inside panel/ for local file:// use.
+/panel/.venv
+/panel/backend
+/panel/config
+/panel/scripts
+/panel/tmp

@@ -1,0 +1,260 @@
+function _jsxReadTextFile(path) {
+    var file = new File(path);
+    if (!file.exists) {
+        throw new Error("File not found: " + path);
+    }
+    file.encoding = "UTF-8";
+    if (!file.open("r")) {
+        throw new Error("Cannot open file: " + path);
+    }
+    var text = file.read();
+    file.close();
+    return text;
+}
+
+function _jsxParseJSON(text) {
+    if (typeof JSON !== "undefined" && JSON.parse) {
+        return JSON.parse(text);
+    }
+    return eval("(" + text + ")");
+}
+
+function readJsonFile(path) {
+    return _jsxParseJSON(_jsxReadTextFile(path));
+}
+
+function loadPresets(path) {
+    return readJsonFile(path);
+}
+
+function _cloneObject(obj) {
+    if (!obj) {
+        return {};
+    }
+    if (typeof JSON !== "undefined" && JSON.stringify && JSON.parse) {
+        return JSON.parse(JSON.stringify(obj));
+    }
+    var copy = {};
+    for (var k in obj) {
+        if (obj.hasOwnProperty(k)) {
+            copy[k] = obj[k];
+        }
+    }
+    return copy;
+}
+
+function resolvePreset(presets, presetName, marginY) {
+    var base = presets[presetName] || presets.box || presets.minimal || {};
+    var preset = _cloneObject(base);
+    if (marginY !== null && marginY !== undefined && marginY !== "" && !isNaN(Number(marginY))) {
+        preset.marginY = Number(marginY);
+    }
+    if (preset.marginY === undefined || preset.marginY === null) {
+        preset.marginY = 180;
+    }
+    return preset;
+}
+
+function findLayerByName(comp, name) {
+    for (var i = 1; i <= comp.numLayers; i++) {
+        var layer = comp.layer(i);
+        if (layer.name === name) {
+            return layer;
+        }
+    }
+    return null;
+}
+
+function findCompByName(name) {
+    if (!app.project) {
+        return null;
+    }
+    for (var i = 1; i <= app.project.numItems; i++) {
+        var item = app.project.item(i);
+        if (item instanceof CompItem && item.name === name) {
+            return item;
+        }
+    }
+    return null;
+}
+
+function resolveTargetComp(target, compName) {
+    if (!app.project) {
+        throw new Error("No active project.");
+    }
+
+    if (target === "comp_name") {
+        var named = findCompByName(compName || "");
+        if (named) {
+            return named;
+        }
+        throw new Error("Comp not found: " + compName);
+    }
+
+    if (target === "selected_footage") {
+        if (app.project.selection && app.project.selection.length > 0) {
+            var selected = app.project.selection[0];
+            if (selected instanceof FootageItem) {
+                var fps = selected.mainSource && selected.mainSource.conformFrameRate ? selected.mainSource.conformFrameRate : 25;
+                if (!fps || fps <= 0) {
+                    fps = 25;
+                }
+                var duration = selected.duration > 0 ? selected.duration : 10;
+                return app.project.items.addComp(selected.name + "_SUBS", selected.width, selected.height, selected.pixelAspect, duration, fps);
+            }
+            if (selected instanceof CompItem) {
+                return selected;
+            }
+        }
+    }
+
+    if (app.project.activeItem && app.project.activeItem instanceof CompItem) {
+        return app.project.activeItem;
+    }
+
+    throw new Error("No target comp: open a comp or choose comp_name/selected_footage.");
+}
+
+function ensureSubtitlesContainer(comp) {
+    var container = findLayerByName(comp, "SUBTITLES__AUTO");
+    if (container) {
+        return container;
+    }
+
+    container = comp.layers.addNull();
+    container.name = "SUBTITLES__AUTO";
+    container.guideLayer = true;
+    container.enabled = false;
+    container.shy = true;
+    container.locked = true;
+    container.inPoint = 0;
+    container.outPoint = comp.duration;
+    return container;
+}
+
+function setTextStyle(doc, preset) {
+    if (preset.font) {
+        doc.font = preset.font;
+    }
+    if (preset.fontSize) {
+        doc.fontSize = Number(preset.fontSize);
+    }
+    if (preset.fillColor && preset.fillColor.length === 3) {
+        doc.fillColor = [Number(preset.fillColor[0]), Number(preset.fillColor[1]), Number(preset.fillColor[2])];
+    }
+    doc.applyFill = true;
+
+    if (preset.strokeEnabled) {
+        doc.applyStroke = true;
+        if (preset.strokeColor && preset.strokeColor.length === 3) {
+            doc.strokeColor = [Number(preset.strokeColor[0]), Number(preset.strokeColor[1]), Number(preset.strokeColor[2])];
+        }
+        if (preset.strokeWidth !== undefined) {
+            doc.strokeWidth = Number(preset.strokeWidth);
+        }
+    } else {
+        doc.applyStroke = false;
+    }
+
+    if (preset.tracking !== undefined) {
+        doc.tracking = Number(preset.tracking);
+    }
+    if (preset.leading !== undefined) {
+        doc.leading = Number(preset.leading);
+        doc.autoLeading = false;
+    }
+    if (preset.allCaps !== undefined) {
+        doc.allCaps = !!preset.allCaps;
+    }
+    doc.justification = ParagraphJustification.CENTER_JUSTIFY;
+}
+
+function applyPresetToTextLayer(textLayer, preset, comp, linesCount) {
+    var sourceText = textLayer.property("Source Text");
+    var doc = sourceText.value;
+    setTextStyle(doc, preset);
+    sourceText.setValue(doc);
+
+    var y = comp.height - Number(preset.marginY || 180);
+    if (linesCount > 1) {
+        y -= 22;
+    }
+    textLayer.property("Transform").property("Position").setValue([comp.width / 2, y]);
+}
+
+function _escapeForExpression(str) {
+    return String(str).replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+}
+
+function ensureBoxLayer(comp, id, textLayer, preset) {
+    var boxName = "BOX__" + id;
+    var box = findLayerByName(comp, boxName);
+    if (!box) {
+        box = comp.layers.addShape();
+        box.name = boxName;
+    }
+
+    box.inPoint = textLayer.inPoint;
+    box.outPoint = textLayer.outPoint;
+    box.enabled = true;
+
+    var contents = box.property("ADBE Root Vectors Group");
+    while (contents.numProperties > 0) {
+        contents.property(1).remove();
+    }
+
+    var group = contents.addProperty("ADBE Vector Group");
+    group.name = "BG";
+    var g = group.property("ADBE Vectors Group");
+    var rect = g.addProperty("ADBE Vector Shape - Rect");
+    var fill = g.addProperty("ADBE Vector Graphic - Fill");
+
+    var color = preset.boxColor || [0, 0, 0];
+    fill.property("ADBE Vector Fill Color").setValue([Number(color[0]), Number(color[1]), Number(color[2])]);
+    fill.property("ADBE Vector Fill Opacity").setValue(Number(preset.boxOpacity !== undefined ? preset.boxOpacity : 80));
+
+    var pad = Number(preset.boxPadding !== undefined ? preset.boxPadding : 16);
+    var layerNameEsc = _escapeForExpression(textLayer.name);
+
+    rect.property("ADBE Vector Rect Size").expression =
+        "var t=thisComp.layer(\"" + layerNameEsc + "\");\\n" +
+        "var r=t.sourceRectAtTime(time,false);\\n" +
+        "[r.width+" + (pad * 2) + ", r.height+" + (pad * 2) + "];";
+
+    group.property("ADBE Vector Transform Group").property("ADBE Vector Position").expression =
+        "var t=thisComp.layer(\"" + layerNameEsc + "\");\\n" +
+        "var r=t.sourceRectAtTime(time,false);\\n" +
+        "[r.left + r.width/2, r.top + r.height/2];";
+
+    box.property("ADBE Transform Group").property("ADBE Position").expression =
+        "thisComp.layer(\"" + layerNameEsc + "\").transform.position;";
+
+    box.moveAfter(textLayer);
+    return box;
+}
+
+function cleanupUnusedAutoLayers(comp, expectedIds, updateMode) {
+    for (var i = comp.numLayers; i >= 1; i--) {
+        var layer = comp.layer(i);
+        var name = layer.name;
+        var id = null;
+
+        if (name.indexOf("SUB__") === 0) {
+            id = name.substring(5);
+        } else if (name.indexOf("BOX__") === 0) {
+            id = name.substring(5);
+        }
+
+        if (!id) {
+            continue;
+        }
+
+        if (!expectedIds[id]) {
+            if (updateMode === "rebuild") {
+                layer.remove();
+            } else {
+                layer.enabled = false;
+            }
+        }
+    }
+}

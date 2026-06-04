@@ -1,0 +1,65 @@
+#!/bin/zsh
+set -e
+
+INSTALLER_ROOT="/Library/Application Support/AEAutoSubtitlesInstaller"
+EXT_SRC="$INSTALLER_ROOT/extension/com.airliner.aeautosubtitles"
+
+CONSOLE_USER=$(stat -f%Su /dev/console || true)
+if [[ -z "$CONSOLE_USER" || "$CONSOLE_USER" == "root" ]]; then
+  echo "No active console user; installed payload only at: $EXT_SRC"
+  exit 0
+fi
+
+USER_HOME=$(dscl . -read "/Users/$CONSOLE_USER" NFSHomeDirectory 2>/dev/null | awk '{print $2}')
+if [[ -z "$USER_HOME" ]]; then
+  USER_HOME="/Users/$CONSOLE_USER"
+fi
+
+TARGET_EXT_DIR="$USER_HOME/Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles"
+TARGET_EXT_PARENT="$USER_HOME/Library/Application Support/Adobe/CEP/extensions"
+
+mkdir -p "$TARGET_EXT_PARENT"
+rm -rf "$TARGET_EXT_DIR"
+cp -R "$EXT_SRC" "$TARGET_EXT_DIR"
+chown -R "$CONSOLE_USER":staff "$TARGET_EXT_DIR"
+chmod -R u+rwX "$TARGET_EXT_DIR"
+mkdir -p "$TARGET_EXT_DIR/tmp"
+
+# Enable CEP debug mode for common CSXS versions.
+for v in 10 11 12; do
+  su - "$CONSOLE_USER" -c "defaults write com.adobe.CSXS.$v PlayerDebugMode 1" >/dev/null 2>&1 || true
+done
+
+# Resolve Python and install backend deps in extension-local venv.
+PY=""
+if [[ -x "/opt/homebrew/bin/python3" ]]; then
+  PY="/opt/homebrew/bin/python3"
+elif [[ -x "/usr/local/bin/python3" ]]; then
+  PY="/usr/local/bin/python3"
+elif [[ -x "/usr/bin/python3" ]]; then
+  PY="/usr/bin/python3"
+elif command -v python3 >/dev/null 2>&1; then
+  PY="$(command -v python3)"
+fi
+
+if [[ -n "$PY" ]]; then
+  WHEEL_DIR="$TARGET_EXT_DIR/runtime/wheels"
+  REQ_FILE="$TARGET_EXT_DIR/backend/requirements.txt"
+  su - "$CONSOLE_USER" -c "'$PY' -m venv '$TARGET_EXT_DIR/.venv'" >/tmp/ae_auto_subtitles_postinstall.log 2>&1 || true
+  su - "$CONSOLE_USER" -c "'$TARGET_EXT_DIR/.venv/bin/python3' -m pip install --upgrade pip" >>/tmp/ae_auto_subtitles_postinstall.log 2>&1 || true
+
+  if [[ -d "$WHEEL_DIR" ]]; then
+    su - "$CONSOLE_USER" -c "'$TARGET_EXT_DIR/.venv/bin/python3' -m pip install --no-index --find-links '$WHEEL_DIR' -r '$REQ_FILE'" >>/tmp/ae_auto_subtitles_postinstall.log 2>&1 || true
+  fi
+
+  # Fallback to online install if offline wheelhouse mismatch occurs.
+  su - "$CONSOLE_USER" -c "'$TARGET_EXT_DIR/.venv/bin/python3' -c \"import importlib.util,sys;sys.exit(0 if importlib.util.find_spec('faster_whisper') else 1)\"" >>/tmp/ae_auto_subtitles_postinstall.log 2>&1 || \
+    su - "$CONSOLE_USER" -c "'$TARGET_EXT_DIR/.venv/bin/python3' -m pip install -r '$REQ_FILE'" >>/tmp/ae_auto_subtitles_postinstall.log 2>&1 || true
+fi
+
+# Make bundled ffmpeg executable if present.
+if [[ -f "$TARGET_EXT_DIR/runtime/bin/ffmpeg" ]]; then
+  chmod +x "$TARGET_EXT_DIR/runtime/bin/ffmpeg" || true
+fi
+
+exit 0
