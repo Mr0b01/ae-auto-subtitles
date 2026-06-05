@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="560" viewBox="0 0 1280 560" role="img" aria-labelledby="title desc">
+  <title id="title">AED Subtitles product preview</title>
+  <desc id="desc">A stylized preview of the AED Subtitles After Effects panel with review, reference, and style controls.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#07121d"/>
+      <stop offset="0.55" stop-color="#102235"/>
+      <stop offset="1" stop-color="#07121d"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" x2="1">
+      <stop offset="0" stop-color="#2bb8f0"/>
+      <stop offset="1" stop-color="#49d59d"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#000000" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="560" rx="34" fill="url(#bg)"/>
+  <path d="M0 0h1280v560H0z" fill="none" stroke="#26384f" stroke-width="2"/>
+  <g filter="url(#shadow)">
+    <rect x="54" y="52" width="1168" height="456" rx="24" fill="#0b1724" stroke="#2a4058" stroke-width="2"/>
+    <rect x="54" y="52" width="1168" height="82" rx="24" fill="#13263a"/>
+    <text x="90" y="103" fill="#f4f7fb" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="30">AED Subtitles</text>
+    <rect x="275" y="73" width="92" height="36" rx="18" fill="#0f1d2c" stroke="#39526d"/>
+    <text x="295" y="98" fill="#a9bfd5" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="18">1.0.135</text>
+    <rect x="894" y="68" width="132" height="48" rx="16" fill="#101b2a" stroke="#334960" stroke-width="2"/>
+    <text x="943" y="99" fill="#f4f7fb" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="21" text-anchor="middle">Scan</text>
+    <rect x="1042" y="68" width="156" height="48" rx="16" fill="#174d73" stroke="#27b8ef" stroke-width="2"/>
+    <text x="1120" y="99" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="21" text-anchor="middle">Run</text>
+  </g>
+  <g>
+    <rect x="86" y="172" width="376" height="266" rx="20" fill="#0a1420" stroke="#293e55" stroke-width="2"/>
+    <text x="112" y="216" fill="#f4f7fb" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="25">Review Captions</text>
+    <rect x="112" y="246" width="324" height="54" rx="14" fill="#0d2431" stroke="#25b8ef" stroke-width="2"/>
+    <text x="132" y="281" fill="#8edfff" font-family="Menlo, Consolas, monospace" font-weight="800" font-size="19">00:00.7 - 00:04.5</text>
+    <rect x="112" y="314" width="324" height="54" rx="14" fill="#081017" stroke="#1e3041"/>
+    <text x="132" y="349" fill="#a8bacb" font-family="Menlo, Consolas, monospace" font-weight="800" font-size="19">00:04.6 - 00:07.2</text>
+    <rect x="112" y="382" width="324" height="54" rx="14" fill="#06211e" stroke="#20c28a"/>
+    <text x="132" y="417" fill="#8edfff" font-family="Menlo, Consolas, monospace" font-weight="800" font-size="19">REFERENCE</text>
+  </g>
+  <g>
+    <rect x="504" y="172" width="318" height="266" rx="20" fill="#111e2c" stroke="#30475f" stroke-width="2"/>
+    <text x="532" y="216" fill="#f4f7fb" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="25">Caption Preview</text>
+    <rect x="574" y="242" width="178" height="326" rx="22" fill="#202b36" stroke="#46596b" stroke-width="2" transform="translate(0 -54)"/>
+    <rect x="594" y="212" width="138" height="284" rx="18" fill="#15212d" stroke="#1d8f7f" stroke-width="2" stroke-dasharray="8 8"/>
+    <line x1="594" y1="354" x2="732" y2="354" stroke="#376380" stroke-width="2" stroke-dasharray="8 8"/>
+    <rect x="587" y="350" width="166" height="45" rx="12" fill="#050607"/>
+    <text x="670" y="379" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="23" text-anchor="middle">you deserve</text>
+    <rect x="596" y="400" width="148" height="45" rx="12" fill="#050607"/>
+    <text x="670" y="429" fill="#ffd51d" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="23" text-anchor="middle">better timing</text>
+  </g>
+  <g>
+    <rect x="864" y="172" width="334" height="266" rx="20" fill="#0a1420" stroke="#293e55" stroke-width="2"/>
+    <text x="892" y="216" fill="#f4f7fb" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="25">Production Controls</text>
+    <text x="892" y="260" fill="#a9bfd5" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="20">Model</text>
+    <rect x="1012" y="236" width="148" height="38" rx="12" fill="#13283b" stroke="#25b8ef"/>
+    <text x="1086" y="261" fill="#8ee4ff" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="20" text-anchor="middle">turbo</text>
+    <text x="892" y="310" fill="#a9bfd5" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="20">Audio</text>
+    <rect x="1012" y="286" width="148" height="38" rx="12" fill="#13283b" stroke="#28c990"/>
+    <text x="1086" y="311" fill="#bfffe2" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="18" text-anchor="middle">Active mix</text>
+    <text x="892" y="360" fill="#a9bfd5" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="20">Style</text>
+    <rect x="1012" y="336" width="148" height="38" rx="12" fill="#241f14" stroke="#ffd51d"/>
+    <text x="1086" y="361" fill="#ffd51d" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="18" text-anchor="middle">Bold Yellow</text>
+    <rect x="892" y="394" width="118" height="38" rx="12" fill="url(#accent)"/>
+    <text x="951" y="419" fill="#06131c" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" text-anchor="middle">Apply</text>
+    <rect x="1024" y="394" width="136" height="38" rx="12" fill="#101b2a" stroke="#334960"/>
+    <text x="1092" y="419" fill="#f4f7fb" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" text-anchor="middle">Native QA</text>
+  </g>
+  <text x="640" y="496" fill="#a9bfd5" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="22" text-anchor="middle">Local Whisper captions, reference correction, and editable After Effects layers.</text>
+</svg>
