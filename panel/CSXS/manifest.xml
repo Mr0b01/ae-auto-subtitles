@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.airliner.aeautosubtitles" ExtensionBundleVersion="1.0.134" ExtensionBundleName="AED Subtitles">
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.airliner.aeautosubtitles" ExtensionBundleVersion="1.0.135" ExtensionBundleName="AED Subtitles">
   <ExtensionList>
-    <Extension Id="com.airliner.aeautosubtitles.panel" Version="1.0.134" />
+    <Extension Id="com.airliner.aeautosubtitles.panel" Version="1.0.135" />
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>

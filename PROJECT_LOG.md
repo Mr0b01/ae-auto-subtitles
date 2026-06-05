@@ -5,7 +5,7 @@ This file is the running project log for the AE auto-subtitles panel. Keep it cu
 ## Current State
 
 - Installed CEP extension path: `/Users/airliner/Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles`
-- Current version: `1.0.134`
+- Current version: `1.0.135`
 - Main UI: `/Users/airliner/ae-auto-subtitles/panel/index.html`
 - Panel logic: `/Users/airliner/ae-auto-subtitles/panel/main.js`
 - AE renderer: `/Users/airliner/ae-auto-subtitles/scripts/create_subtitles.jsx`
@@ -22,6 +22,13 @@ This file is the running project log for the AE auto-subtitles panel. Keep it cu
 - A top `Position` null remains a future/opt-in control goal, but it must not be created or touched during normal Apply until its coordinate handling is stable.
 
 ## Recent Changes
+
+### 1.0.135
+
+- Fixed the timeline "red shard staircase" failure in montage comps by making checked `Active comp mix` truly run first. File-backed sources remain available as a manual fast path, but they are no longer auto-checked when comp mix is the default.
+- Root cause verified in active comp `01`: the panel transcribed 9 separate file-backed layers, including short B-roll/audio clips, and accepted an impossible raw item (`19` words in `0.04s`). AE then faithfully created one-frame subtitle layers from that bad JSON.
+- Added backend/postprocess guards that drop punctuation-only transcript items and dense hallucinated captions whose text cannot physically fit in the reported duration.
+- Verification: `node --check panel/main.js`, Python compile checks, targeted dense-timing tests, and `python -m unittest discover -s tests` passed after syncing the installed CEP copy.
 
 ### 1.0.134
 

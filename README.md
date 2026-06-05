@@ -7,7 +7,7 @@ Auto-subtitles pipeline for After Effects:
 - review/edit captions before applying
 - apply reference-text corrections and changed-only caption patches
 - create/update AE subtitle text layers with presets, safe-zone positioning, and native QA checks
-- CEP panel scans active timeline audio and selects all file-backed audio layers by default
+- CEP panel scans active timeline audio and selects Active comp mix by default, with file-backed sources available as a manual fast path
 
 ## Project structure
 ```text
@@ -98,5 +98,5 @@ Runtime logs are written to:
 - Release target is macOS.
 - 24/25/29.97 fps are supported via second-based in/out timing in AE.
 - CEP UI is the primary workflow surface over backend transcription, review, style preview, and JSX apply.
-- In panel mode, `Scan` reads enabled audio layers from active comp and selects all file-backed audio layers by default, which avoids missing speech in montage-style timelines.
+- In panel mode, `Scan` reads enabled audio layers from the active comp and selects Active comp mix by default, which avoids random B-roll/file-source timing shards in montage-style timelines. File-backed sources remain available as a manual fast path.
 - `Native QA` runs syntax checks, unit smoke tests, and real AE layout/timing self-tests.

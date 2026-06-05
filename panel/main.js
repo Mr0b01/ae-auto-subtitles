@@ -1,5 +1,5 @@
 (function () {
-  var APP_VERSION = "1.0.134";
+  var APP_VERSION = "1.0.135";
   if (typeof window !== "undefined") {
     window.AEAS_TEST_HOOKS = { version: APP_VERSION, boot: "early" };
   }
@@ -5825,13 +5825,21 @@
     if (!activeCompMixAvailable || !useCompMixSelection()) {
       return false;
     }
+    return true;
+  }
+
+  function shouldUseFileSourcesAfterCompMix(selectedSources) {
+    var selected = Array.isArray(selectedSources) ? selectedSources : getSelectedSources();
+    if (!activeCompMixAvailable || !useCompMixSelection()) {
+      return false;
+    }
     if (compMixSelectionWasManual) {
-      return true;
+      return false;
     }
     if (activeCompHasNonFileAudio) {
-      return true;
+      return false;
     }
-    return !selected.length;
+    return selected.length > 0;
   }
 
   function getAudioStrategyLabel(selectedSources) {
@@ -5840,7 +5848,9 @@
       return "comp mix first";
     }
     if (useCompMixSelection() && selected.length) {
-      return "fast sources first, comp mix fallback";
+      return shouldRenderCompMixFirst(selected)
+        ? "comp mix first"
+        : "fast sources first, comp mix fallback";
     }
     return selected.length ? "file sources" : "no source";
   }
@@ -5967,7 +5977,7 @@
       cb.type = "checkbox";
       cb.id = "src_" + i;
       cb.dataset.index = String(i);
-      cb.checked = true;
+      cb.checked = !defaultUseCompMix;
       cb.addEventListener("change", handleFileSourceSelectionChange);
 
       var content = document.createElement("div");
@@ -6231,7 +6241,7 @@
     var message =
       "Detected " + activeCompSources.length + " file-backed audio source(s) in comp '" +
       (parsed.compName || "") +
-      "'. Auto-selected all file-backed sources.";
+      "'. Active comp mix is selected by default; file-backed sources are available as a manual fast path.";
     if (nonFileCount > 0) {
       message = "Detected " + activeCompSources.length + " file-backed audio source(s) in comp '" +
         (parsed.compName || "") +
@@ -6477,11 +6487,11 @@
       }
     }
 
-    if (itemsCount === 0 && selectedSources.length && !useCompMix) {
+    if (itemsCount === 0 && selectedSources.length && (!useCompMix || shouldUseFileSourcesAfterCompMix(selectedSources))) {
       await runSelectedSources(selectedSources, 40, "Transcribing selected timeline sources...");
     }
 
-    if (itemsCount === 0 && selectedSources.length && activeCompSources.length > selectedSources.length && !useCompMix) {
+    if (itemsCount === 0 && selectedSources.length && activeCompSources.length > selectedSources.length && (!useCompMix || shouldUseFileSourcesAfterCompMix(selectedSources))) {
       await runSelectedSources(activeCompSources, 66, "No speech in top sources, retrying with all timeline audio...");
     }
 

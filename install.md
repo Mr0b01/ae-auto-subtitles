@@ -61,7 +61,7 @@ builder cache. The panel defaults to `turbo`; if the model is not bundled, the
 first transcription may download it through faster-whisper/Hugging Face.
 
 Panel buttons:
-- `Scan` / `Rescan`: read active comp audio layers and select all file-backed layers by default
+- `Scan` / `Rescan`: read active comp audio layers and select Active comp mix by default; file-backed layers remain available as a manual fast path
 - `Retiming`: regenerate `tmp/raw.json` + `tmp/subtitles.json` from the current audio/model
 - `Run`: apply the current queued transcription/style to AE
 - `Apply Changed`: update only captions changed by reference text

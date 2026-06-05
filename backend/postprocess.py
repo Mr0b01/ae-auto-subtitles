@@ -10,6 +10,7 @@ except ImportError:
     from io_json import read_json, write_json
 
 FILLER_WORDS = {"uh", "um", "er", "ah", "eh", "like"}
+TEXT_WORD_RE = re.compile(r"[A-Za-z0-9А-Яа-яІіЇїЄєҐґ\u0900-\u097F]+")
 
 DEVANAGARI_RE = re.compile(r"[\u0900-\u097F]")
 HINGLISH_WORD_OVERRIDES = {
@@ -232,6 +233,26 @@ def _word_is_filler(text: str) -> bool:
     return key in FILLER_WORDS
 
 
+def _text_word_count(text: str) -> int:
+    return len(TEXT_WORD_RE.findall(str(text or "")))
+
+
+def _is_punctuation_only(text: str) -> bool:
+    return _text_word_count(text) == 0
+
+
+def _is_implausible_dense_segment(start: float, end: float, text: str, words: list[Word]) -> bool:
+    if _is_punctuation_only(text):
+        return True
+
+    word_count = max(_text_word_count(text), len(words or []))
+    if word_count < 4:
+        return False
+
+    duration = max(0.0, end - start)
+    return duration < max(0.25, word_count * 0.075)
+
+
 def _build_text_from_words(words: list[Word], fallback_text: str = "") -> str:
     if words:
         return _clean_text(" ".join(word.text for word in words))
@@ -316,6 +337,8 @@ def _normalize_items(raw: Any, strip_fillers: bool = False) -> list[Segment]:
 
         text = _build_text_from_words(words, text)
         if not text:
+            continue
+        if _is_implausible_dense_segment(start, end, text, words):
             continue
 
         segments.append(Segment(start=start, end=end, text=text, words=words))

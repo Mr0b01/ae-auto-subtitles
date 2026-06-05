@@ -581,6 +581,36 @@ def _fit_word_timings_to_item(item: dict[str, Any]) -> None:
     item["words"] = fitted
 
 
+_TEXT_WORD_RE = re.compile(r"[A-Za-z0-9А-Яа-яІіЇїЄєҐґ\u0900-\u097F]+")
+
+
+def _text_word_count(text: str) -> int:
+    return len(_TEXT_WORD_RE.findall(str(text or "")))
+
+
+def _is_punctuation_only(text: str) -> bool:
+    return _text_word_count(text) == 0
+
+
+def _is_implausible_dense_caption(item: dict[str, Any]) -> bool:
+    text = str(item.get("text", "") or "")
+    if _is_punctuation_only(text):
+        return True
+
+    word_count = max(_text_word_count(text), len(item.get("words") or []))
+    if word_count < 4:
+        return False
+
+    start = _to_float(item.get("start"), 0.0)
+    end = _to_float(item.get("end"), start)
+    duration = max(0.0, end - start)
+
+    # Faster-whisper can hallucinate a long phrase in a few frames when a
+    # montage clip contains silence/music instead of voice. Those segments
+    # create one-frame subtitle shards in AE, so drop them before postprocess.
+    return duration < max(0.25, word_count * 0.075)
+
+
 def _stabilize_timeline_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     if not items:
         return []
@@ -596,6 +626,8 @@ def _stabilize_timeline_items(items: list[dict[str, Any]]) -> list[dict[str, Any
             end = start + 0.05
         item["start"] = round(max(0.0, start), 3)
         item["end"] = round(max(item["start"] + 0.01, end), 3)
+        if _is_implausible_dense_caption(item):
+            continue
 
         if stabilized:
             prev = stabilized[-1]
@@ -783,17 +815,25 @@ def run_full_sources(
                         }
                     )
 
-                pass_items.append(
-                    {
-                        "start": round(start, 3),
-                        "end": round(end, 3),
-                        "text": str(item.get("text", "")).strip(),
-                        "confidence": round(_to_float(item.get("confidence"), 0.0), 3),
-                        "words": shifted_words,
-                        "source": str(src_path),
-                        "layer": str(source.get("layerName") or f"source_{idx}"),
-                    }
-                )
+                timeline_item = {
+                    "start": round(start, 3),
+                    "end": round(end, 3),
+                    "text": str(item.get("text", "")).strip(),
+                    "confidence": round(_to_float(item.get("confidence"), 0.0), 3),
+                    "words": shifted_words,
+                    "source": str(src_path),
+                    "layer": str(source.get("layerName") or f"source_{idx}"),
+                }
+                if _is_implausible_dense_caption(timeline_item):
+                    if logger:
+                        logger.info(
+                            "Skipping implausible dense transcript item: %.3f-%.3f %s",
+                            timeline_item["start"],
+                            timeline_item["end"],
+                            timeline_item["text"][:120],
+                        )
+                    continue
+                pass_items.append(timeline_item)
 
             pass_processed += 1
 

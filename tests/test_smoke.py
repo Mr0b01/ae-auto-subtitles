@@ -195,6 +195,74 @@ class SmokeTests(unittest.TestCase):
         self.assertEqual(words[1]["start"], 1.05)
         self.assertEqual(words[1]["end"], 1.28)
 
+    def test_postprocess_drops_dense_hallucinated_timing(self):
+        sys.path.insert(0, str(ROOT))
+        from backend.postprocess import postprocess_subtitles
+
+        raw = {
+            "items": [
+                {
+                    "start": 1.633,
+                    "end": 1.673,
+                    "text": "Your brain has one second to notice the pattern to solve the signal",
+                    "words": [
+                        {"start": 1.633, "end": 1.643, "text": "Your"},
+                        {"start": 1.643, "end": 1.653, "text": "brain"},
+                        {"start": 1.653, "end": 1.663, "text": "has"},
+                        {"start": 1.663, "end": 1.673, "text": "one"},
+                        {"start": 1.673, "end": 1.673, "text": "second"},
+                        {"start": 1.673, "end": 1.673, "text": "to"},
+                        {"start": 1.673, "end": 1.673, "text": "notice"},
+                    ],
+                },
+                {
+                    "start": 2.0,
+                    "end": 3.2,
+                    "text": "real spoken line",
+                    "words": [
+                        {"start": 2.0, "end": 2.35, "text": "real"},
+                        {"start": 2.35, "end": 2.8, "text": "spoken"},
+                        {"start": 2.8, "end": 3.2, "text": "line"},
+                    ],
+                },
+            ],
+            "language": "en",
+        }
+        out = postprocess_subtitles(raw, max_chars_per_line=42, max_lines=2)
+        self.assertEqual([item["text"] for item in out["items"]], ["real spoken line"])
+
+    def test_transcribe_stabilizer_drops_dense_hallucinated_timing(self):
+        sys.path.insert(0, str(ROOT))
+        from backend.transcribe import _stabilize_timeline_items
+
+        items = [
+            {
+                "start": 1.633,
+                "end": 1.673,
+                "text": "Your brain has one second to notice the pattern to solve the signal",
+                "words": [
+                    {"start": 1.633, "end": 1.643, "text": "Your"},
+                    {"start": 1.643, "end": 1.653, "text": "brain"},
+                    {"start": 1.653, "end": 1.663, "text": "has"},
+                    {"start": 1.663, "end": 1.673, "text": "one"},
+                    {"start": 1.673, "end": 1.673, "text": "second"},
+                    {"start": 1.673, "end": 1.673, "text": "to"},
+                ],
+            },
+            {
+                "start": 2.0,
+                "end": 3.2,
+                "text": "real spoken line",
+                "words": [
+                    {"start": 2.0, "end": 2.35, "text": "real"},
+                    {"start": 2.35, "end": 2.8, "text": "spoken"},
+                    {"start": 2.8, "end": 3.2, "text": "line"},
+                ],
+            },
+        ]
+        out = _stabilize_timeline_items(items)
+        self.assertEqual([item["text"] for item in out], ["real spoken line"])
+
     def test_hinglish_mode_outputs_latin_subtitles(self):
         sys.path.insert(0, str(ROOT))
         from backend.postprocess import postprocess_subtitles
@@ -735,23 +803,22 @@ class SmokeTests(unittest.TestCase):
         self.assertNotIn("This is a classic karaoke caption", panel_js)
         self.assertNotIn("This is a classic caption", panel_js)
 
-    def test_comp_mix_is_explicit_source_not_hidden_priority(self):
+    def test_comp_mix_is_default_source_not_hidden_priority(self):
         panel_js = (ROOT / "panel" / "main.js").read_text(encoding="utf-8")
         self.assertIn("Active comp mix -> all audible audio in comp", panel_js)
         self.assertIn("function useCompMixSelection()", panel_js)
         self.assertIn("function shouldRenderCompMixFirst(selectedSources)", panel_js)
+        self.assertIn("function shouldUseFileSourcesAfterCompMix(selectedSources)", panel_js)
         self.assertIn("var compMixSelectionWasManual = false;", panel_js)
-        self.assertIn("if (compMixSelectionWasManual) {", panel_js)
-        self.assertIn("if (activeCompHasNonFileAudio) {", panel_js)
         self.assertIn("var defaultUseCompMix = !!activeCompMixAvailable;", panel_js)
         self.assertIn("mixCb.checked = defaultUseCompMix;", panel_js)
-        self.assertIn("cb.checked = true;", panel_js)
-        self.assertIn("Auto-selected all file-backed sources.", panel_js)
-        self.assertIn("By default all file-backed layers are selected.", (ROOT / "panel" / "index.html").read_text(encoding="utf-8"))
+        self.assertIn("cb.checked = !defaultUseCompMix;", panel_js)
+        self.assertIn("return true;", panel_js)
+        self.assertIn("By default Active comp mix is selected.", (ROOT / "panel" / "index.html").read_text(encoding="utf-8"))
         self.assertNotIn("Auto-selected longest 2.", panel_js)
         self.assertNotIn("cb.checked = i < 2;", panel_js)
+        self.assertNotIn("cb.checked = true;", panel_js)
         self.assertIn("Fast path: transcribing selected audio sources first; comp mix remains fallback.", panel_js)
-        self.assertIn("activeCompHasNonFileAudio &&\n      !useCompMix &&", panel_js)
         self.assertNotIn("run will prioritize comp mix", panel_js)
         self.assertIn("nested/precomp audio layer(s), so Active comp mix can be used to catch voice inside the comp.", panel_js)
         self.assertIn("The spoken voice is likely inside nested/precomp audio. Enable Active comp mix and run again.", panel_js)
