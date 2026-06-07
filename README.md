@@ -1,13 +1,38 @@
-# AED Subtitles
+<h1 align="center">AED Subtitles</h1>
 
-Descript-style captions for Adobe After Effects. Transcribe the active comp, review and correct the captions, style them in a visual panel, then generate editable native AE text layers.
+<p align="center">
+  <strong>Local Whisper captions for Adobe After Effects, built for editors who need Descript-style review, correction, timing, and native AE text layers.</strong>
+</p>
 
-[![Latest release](https://img.shields.io/github/v/release/Mr0b01/ae-auto-subtitles?label=latest)](https://github.com/Mr0b01/ae-auto-subtitles/releases/latest)
-[![Download installer](https://img.shields.io/badge/Download-macOS%20installer-20b7ff?style=for-the-badge)](https://github.com/Mr0b01/ae-auto-subtitles/releases/latest/download/AE-Auto-Subtitles-Installer-1.0.135.pkg)
-[![After Effects](https://img.shields.io/badge/After%20Effects-CEP%20%2F%20ExtendScript-7c5cff)](#requirements)
-[![Whisper](https://img.shields.io/badge/STT-Whisper%20Turbo-28c76f)](#models)
+<p align="center">
+  <a href="https://github.com/Mr0b01/ae-auto-subtitles/releases/latest/download/AE-Auto-Subtitles-Installer-1.0.135.pkg"><strong>Download installer</strong></a>
+  &nbsp;|&nbsp;
+  <a href="https://github.com/Mr0b01/ae-auto-subtitles/releases/latest">Latest release</a>
+  &nbsp;|&nbsp;
+  <a href="install.md">Install guide</a>
+  &nbsp;|&nbsp;
+  <a href="#workflow">Workflow</a>
+  &nbsp;|&nbsp;
+  <a href="#troubleshooting">Troubleshooting</a>
+</p>
 
-![AED Subtitles preview](docs/assets/aed-subtitles-hero.svg)
+<p align="center">
+  <a href="https://github.com/Mr0b01/ae-auto-subtitles/releases/latest">
+    <img alt="Latest release" src="https://img.shields.io/github/v/release/Mr0b01/ae-auto-subtitles?label=latest">
+  </a>
+  <a href="https://github.com/Mr0b01/ae-auto-subtitles/releases/latest/download/AE-Auto-Subtitles-Installer-1.0.135.pkg">
+    <img alt="Download installer" src="https://img.shields.io/badge/Download-macOS%20installer-20b7ff?style=for-the-badge">
+  </a>
+  <a href="https://github.com/Mr0b01/ae-auto-subtitles/stargazers">
+    <img alt="GitHub stars" src="https://img.shields.io/github/stars/Mr0b01/ae-auto-subtitles?style=social">
+  </a>
+  <img alt="After Effects" src="https://img.shields.io/badge/After%20Effects-CEP%20%2F%20ExtendScript-7c5cff">
+  <img alt="Whisper Turbo" src="https://img.shields.io/badge/STT-Whisper%20Turbo-28c76f">
+</p>
+
+<p align="center">
+  <img alt="AED Subtitles preview" src="docs/assets/aed-subtitles-hero.svg" width="100%">
+</p>
 
 ## Download
 
@@ -16,6 +41,18 @@ Descript-style captions for Adobe After Effects. Transcribe the active comp, rev
 Open the [latest GitHub Release](https://github.com/Mr0b01/ae-auto-subtitles/releases/latest) if you want release notes, checksum details, or older assets.
 
 The installer includes the CEP panel, local Python backend, ExtendScript renderer, bundled ffmpeg, offline Python wheels, and the cached Whisper Turbo model when it is available at build time. If the Turbo model is not bundled, the first transcription can download it automatically.
+
+## Built For
+
+AED Subtitles is for After Effects editors who need captions to stay editable, timing-aware, and visually controlled inside the comp.
+
+| If this is your problem | AED Subtitles gives you |
+| --- | --- |
+| Whisper hears Hinglish, names, or phrasing wrong | Reference Text alignment before creating AE layers |
+| Montage edits split speech across many clips | `Active comp mix`, which transcribes the comp as heard |
+| Captions need review before timeline clutter | Review Captions with source/status labels |
+| Only a few captions changed | `Apply Changed` instead of rebuilding everything |
+| Timing/layout bugs are hard to prove | Native QA with real AE layout and timing self-tests |
 
 ## Why This Exists
 
@@ -30,6 +67,19 @@ Raw SRT imports are not enough for short-form edits. AED Subtitles is built arou
 - generate editable native AE text layers instead of a burned-in video overlay
 - run native self-tests from the panel when timing or layout feels wrong
 
+## What You Get
+
+| Feature | Why it matters |
+| --- | --- |
+| Local Whisper Turbo | Faster default transcription without sending edit audio to a web subtitle service. |
+| Active comp mix | Captures every audible enabled layer in the composition. |
+| Review Captions | Lets you inspect text before creating timeline layers. |
+| Reference Text | Replaces model mistakes with known-correct wording. |
+| Apply Changed | Applies only captions that changed after a reference pass. |
+| Style preview | Keeps font, size, block width, offset, and preset choices in one panel. |
+| Native AE layers | Creates editable text layers instead of a baked video overlay. |
+| Native QA | Runs syntax, unit, real AE layout, and real AE timing checks. |
+
 ## Install In 5 Minutes
 
 1. Download [AE-Auto-Subtitles-Installer-1.0.135.pkg](https://github.com/Mr0b01/ae-auto-subtitles/releases/latest/download/AE-Auto-Subtitles-Installer-1.0.135.pkg).
@@ -39,6 +89,17 @@ Raw SRT imports are not enough for short-form edits. AED Subtitles is built arou
 5. Open `Window -> Extensions -> AED Subtitles`.
 
 If macOS warns that the package is from an unidentified developer, right-click the `.pkg`, choose `Open`, then confirm. The current installer is unsigned.
+
+## Quick Run
+
+1. Open an After Effects composition.
+2. Open `Window -> Extensions -> AED Subtitles`.
+3. Keep `Active comp mix` selected.
+4. Press `Scan` or `Rescan`.
+5. Wait for Whisper Turbo or press `Retiming`.
+6. Review the captions.
+7. Choose a style and placement.
+8. Press `Run`.
 
 ## Workflow
 
@@ -124,6 +185,18 @@ The visible preset list focuses on styles that render predictably in After Effec
 - Static marker karaoke
 
 Dark backplate and Hug Lines style systems are not the default release path yet. They need a new renderer path before they can be trusted in real AE output.
+
+## Stable vs Experimental
+
+| Area | Status |
+| --- | --- |
+| Active comp mix transcription | Stable default |
+| Turbo model transcription | Stable default |
+| Reference text correction | Stable enough for production review |
+| Apply Changed | Stable for changed-text updates |
+| Native AE text layers | Stable default output |
+| Dark backplates / Hug Lines | Experimental, not the default renderer path |
+| Fresh-machine installer signing | Unsigned beta package |
 
 ## Requirements
 
@@ -221,3 +294,5 @@ release-notes/  release notes used by GitHub Releases
 Current source version: `1.0.135`
 
 Latest installer: [AE-Auto-Subtitles-Installer-1.0.135.pkg](https://github.com/Mr0b01/ae-auto-subtitles/releases/latest/download/AE-Auto-Subtitles-Installer-1.0.135.pkg)
+
+README benchmark notes: [docs/readme-benchmark.md](docs/readme-benchmark.md)
