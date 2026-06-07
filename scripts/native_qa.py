@@ -9,6 +9,7 @@ self-test, then writes a machine-readable report to tmp/native_qa_report.json.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -22,9 +23,15 @@ def resolve_repo_root(script_path: Path) -> Path:
     if (local_root / "tests").exists() and (local_root / "panel" / "main.js").exists():
         return local_root
 
-    dev_root = Path("/Users/airliner/ae-auto-subtitles")
-    if (dev_root / "tests").exists() and (dev_root / "panel" / "main.js").exists():
-        return dev_root
+    env_root = os.environ.get("AEAS_REPO_ROOT")
+    if env_root:
+        repo_root = Path(env_root).expanduser()
+        if (repo_root / "tests").exists() and (repo_root / "panel" / "main.js").exists():
+            return repo_root
+
+    home_checkout = Path.home() / "ae-auto-subtitles"
+    if (home_checkout / "tests").exists() and (home_checkout / "panel" / "main.js").exists():
+        return home_checkout
 
     return local_root
 

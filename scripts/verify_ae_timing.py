@@ -8,16 +8,31 @@ subtitle layers drift because AE-side chunking redistributes word timings.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RUNNER = Path(
-    "/Users/airliner/Documents/Codex/2026-05-11/"
-    "https-github-com-aedev-tools-adobe/skills/after-effects/scripts/runner.sh"
-)
+
+
+def resolve_ae_runner() -> Path:
+    env_runner = os.environ.get("AEAS_AE_RUNNER")
+    if env_runner:
+        return Path(env_runner).expanduser()
+
+    candidates = [
+        Path.home() / "Documents/Codex/2026-05-11/https-github-com-aedev-tools-adobe/skills/after-effects/scripts/runner.sh",
+        Path.home() / ".codex/skills/after-effects/scripts/runner.sh",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
+RUNNER = resolve_ae_runner()
 
 
 CASE = {

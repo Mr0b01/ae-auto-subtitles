@@ -9,8 +9,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-INSTALLED_ROOT = Path(
-    "/Users/airliner/Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles"
+INSTALLED_ROOT = (
+    Path.home() /
+    "Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles"
 )
 
 
@@ -650,7 +651,8 @@ class SmokeTests(unittest.TestCase):
         self.assertIn('runRepoPythonScript("scripts/native_qa.py", [], updateRunProgress)', panel_js)
         self.assertIn('bind("btnNativeQa", handleNativeQa);', panel_js)
         self.assertIn("def resolve_repo_root(script_path: Path) -> Path:", native_qa)
-        self.assertIn('Path("/Users/airliner/ae-auto-subtitles")', native_qa)
+        self.assertIn('os.environ.get("AEAS_REPO_ROOT")', native_qa)
+        self.assertIn('Path.home() / "ae-auto-subtitles"', native_qa)
         self.assertIn("REPORT_PATH = ROOT / \"tmp\" / \"native_qa_report.json\"", native_qa)
         self.assertIn("[sys.executable, \"scripts/verify_ae_layout.py\"]", native_qa)
         self.assertIn("[sys.executable, \"scripts/verify_ae_timing.py\"]", native_qa)

@@ -235,7 +235,8 @@ Use `Copy Log` in the panel. Runtime files are written under `tmp/` inside the i
 ## Developer Setup
 
 ```bash
-cd /Users/airliner/ae-auto-subtitles
+git clone https://github.com/Mr0b01/ae-auto-subtitles.git
+cd ae-auto-subtitles
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
@@ -246,7 +247,7 @@ Symlink the CEP panel:
 
 ```bash
 mkdir -p "$HOME/Library/Application Support/Adobe/CEP/extensions"
-ln -snf /Users/airliner/ae-auto-subtitles/panel \
+ln -snf "$(pwd)/panel" \
   "$HOME/Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles"
 ```
 

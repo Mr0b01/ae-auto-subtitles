@@ -1,7 +1,76 @@
-#include "/Users/airliner/Documents/Codex/2026-05-11/https-github-com-aedev-tools-adobe/skills/after-effects/scripts/lib/json2.jsx"
-#include "/Users/airliner/Documents/Codex/2026-05-11/https-github-com-aedev-tools-adobe/skills/after-effects/scripts/lib/utils.jsx"
-
 (function() {
+    function readTextFile(path) {
+        var file = new File(path);
+        if (!file.exists || !file.open("r")) {
+            return "";
+        }
+        file.encoding = "UTF-8";
+        var text = file.read();
+        file.close();
+        return text;
+    }
+
+    function parseJson(text) {
+        var raw = String(text || "");
+        if (raw.length && raw.charCodeAt(0) === 0xFEFF) {
+            raw = raw.substring(1);
+        }
+        if (typeof JSON !== "undefined" && JSON.parse) {
+            return JSON.parse(raw);
+        }
+        return eval("(" + raw + ")");
+    }
+
+    function escapeJson(value) {
+        return String(value === undefined || value === null ? "" : value)
+            .replace(/\\/g, "\\\\")
+            .replace(/"/g, "\\\"")
+            .replace(/\r/g, "\\r")
+            .replace(/\n/g, "\\n");
+    }
+
+    function stringifyJson(value) {
+        if (typeof JSON !== "undefined" && JSON.stringify) {
+            return JSON.stringify(value);
+        }
+        if (value === null || value === undefined) {
+            return "null";
+        }
+        if (typeof value === "number" || typeof value === "boolean") {
+            return String(value);
+        }
+        if (typeof value === "string") {
+            return "\"" + escapeJson(value) + "\"";
+        }
+        if (value instanceof Array) {
+            var items = [];
+            for (var i = 0; i < value.length; i++) {
+                items.push(stringifyJson(value[i]));
+            }
+            return "[" + items.join(",") + "]";
+        }
+        var pairs = [];
+        for (var key in value) {
+            if (value.hasOwnProperty(key)) {
+                pairs.push("\"" + escapeJson(key) + "\":" + stringifyJson(value[key]));
+            }
+        }
+        return "{" + pairs.join(",") + "}";
+    }
+
+    function readArgs() {
+        var text = readTextFile("/tmp/ae-assistant-args.json");
+        return text ? parseJson(text) : {};
+    }
+
+    function writeResult(obj) {
+        var outFile = new File("/tmp/ae-assistant-result.json");
+        outFile.encoding = "UTF-8";
+        outFile.open("w");
+        outFile.write(stringifyJson(obj));
+        outFile.close();
+    }
+
     var args = readArgs();
     var result = {
         ok: false,
