@@ -114,7 +114,7 @@ Restart After Effects and open `Window -> Extensions -> AED Subtitles`.
 ```bash
 source .venv/bin/activate
 python backend/transcribe.py --full_run \
-  --input samples/sample.mp4 \
+  --input /path/to/video.mp4 \
   --out tmp/raw.json \
   --subtitles_out tmp/subtitles.json \
   --model turbo

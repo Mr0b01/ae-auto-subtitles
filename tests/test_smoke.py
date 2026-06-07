@@ -755,12 +755,29 @@ class SmokeTests(unittest.TestCase):
         panel_js = (ROOT / "panel" / "main.js").read_text(encoding="utf-8")
         panel_html = (ROOT / "panel" / "index.html").read_text(encoding="utf-8")
         manifest = (ROOT / "panel" / "CSXS" / "manifest.xml").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        install = (ROOT / "install.md").read_text(encoding="utf-8")
+        release_notes = ROOT / "release-notes" / f"v{version}.md"
+        installer_name = f"AE-Auto-Subtitles-Installer-{version}.pkg"
         self.assertRegex(version, r"^1\.0\.\d+$")
         self.assertIn(f'var APP_VERSION = "{version}";', panel_js)
         self.assertRegex(panel_html, rf'id="summaryVersion"[^>]*>{re.escape(version)}<')
         self.assertIn(f'live_status {version} | ok | model turbo | idle', panel_html)
         self.assertIn(f'ExtensionBundleVersion="{version}"', manifest)
         self.assertIn(f'Version="{version}"', manifest)
+        self.assertIn(installer_name, readme)
+        self.assertIn(installer_name, install)
+        self.assertTrue(release_notes.exists())
+
+    def test_public_hygiene_check_passes(self):
+        result = subprocess.run(
+            [sys.executable, "scripts/check_public_hygiene.py"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
 
     def test_picker_buttons_have_click_wait_feedback(self):
         panel_js = (ROOT / "panel" / "main.js").read_text(encoding="utf-8")

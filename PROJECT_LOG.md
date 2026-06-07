@@ -4,13 +4,13 @@ This file is the running project log for the AE auto-subtitles panel. Keep it cu
 
 ## Current State
 
-- Installed CEP extension path: `/Users/airliner/Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles`
+- Installed CEP extension path: `$HOME/Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles`
 - Current version: `1.0.135`
-- Main UI: `/Users/airliner/ae-auto-subtitles/panel/index.html`
-- Panel logic: `/Users/airliner/ae-auto-subtitles/panel/main.js`
-- AE renderer: `/Users/airliner/ae-auto-subtitles/scripts/create_subtitles.jsx`
-- Transcription/postprocess: `/Users/airliner/ae-auto-subtitles/backend/`
-- Tests: `/Users/airliner/ae-auto-subtitles/tests/test_smoke.py`
+- Main UI: `panel/index.html`
+- Panel logic: `panel/main.js`
+- AE renderer: `scripts/create_subtitles.jsx`
+- Transcription/postprocess: `backend/`
+- Tests: `tests/test_smoke.py`
 
 ## Standing Product Direction
 
@@ -25,6 +25,9 @@ This file is the running project log for the AE auto-subtitles panel. Keep it cu
 
 ### 1.0.135
 
+- Added public repository hardening: local preflight checks, issue templates, contributing/security docs, architecture/troubleshooting/release docs, and a dependency-free `scripts/check_public_hygiene.py`.
+- Public hygiene now checks tracked files for local machine paths, generated/cache artifacts, stale installer links, missing README assets, and missing current release notes.
+- Replaced local-only sample command examples with generic `/path/to/video.mp4` examples and ignored local `samples/` media.
 - Fixed the timeline "red shard staircase" failure in montage comps by making checked `Active comp mix` truly run first. File-backed sources remain available as a manual fast path, but they are no longer auto-checked when comp mix is the default.
 - Root cause verified in active comp `01`: the panel transcribed 9 separate file-backed layers, including short B-roll/audio clips, and accepted an impossible raw item (`19` words in `0.04s`). AE then faithfully created one-frame subtitle layers from that bad JSON.
 - Added backend/postprocess guards that drop punctuation-only transcript items and dense hallucinated captions whose text cannot physically fit in the reported duration.
@@ -54,7 +57,7 @@ This file is the running project log for the AE auto-subtitles panel. Keep it cu
 
 ### 1.0.131
 
-- Fixed the installed-panel `Native QA` path: when `scripts/native_qa.py` is launched from the CEP extension copy, it now resolves back to the real repo root `/Users/airliner/ae-auto-subtitles` so unit tests, AE self-tests, and sync checks can actually run.
+- Fixed the installed-panel `Native QA` path: when `scripts/native_qa.py` is launched from the CEP extension copy, it now resolves back to the real repo root so unit tests, AE self-tests, and sync checks can actually run.
 - Re-synced the installed CEP extension after detecting `scripts/create_subtitles.jsx` drift between repo and CEP copy.
 - Verification: `node --check panel/main.js`, JSX syntax check, `python -m unittest discover -s tests`, and running the installed CEP copy's `scripts/native_qa.py` all passed. Installed browser smoke found version `1.0.131`, visible `Native QA`, visible preview, console errors `0`, horizontal overflow `0`, and preview self-test lines `ki tumhari shaadi / kisse hogi?`.
 
@@ -322,7 +325,7 @@ python scripts/native_qa.py
 Sync installed CEP copy before final full test when extension files changed:
 
 ```sh
-dest="/Users/airliner/Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles"
+dest="$HOME/Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles"
 cp VERSION "$dest/VERSION"
 cp config/presets.json "$dest/config/presets.json"
 cp scripts/create_subtitles.jsx "$dest/scripts/create_subtitles.jsx"

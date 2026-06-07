@@ -11,9 +11,11 @@
   &nbsp;|&nbsp;
   <a href="install.md">Install guide</a>
   &nbsp;|&nbsp;
-  <a href="#workflow">Workflow</a>
+  <a href="docs/troubleshooting.md">Troubleshooting</a>
   &nbsp;|&nbsp;
-  <a href="#troubleshooting">Troubleshooting</a>
+  <a href="docs/architecture.md">Architecture</a>
+  &nbsp;|&nbsp;
+  <a href="#workflow">Workflow</a>
 </p>
 
 <p align="center">
@@ -208,6 +210,8 @@ Dark backplate and Hug Lines style systems are not the default release path yet.
 
 ## Troubleshooting
 
+Full troubleshooting guide: [docs/troubleshooting.md](docs/troubleshooting.md)
+
 ### The panel is not visible in After Effects
 
 Restart After Effects after installing, then open `Window -> Extensions -> AED Subtitles`.
@@ -234,6 +238,8 @@ Use `Copy Log` in the panel. Runtime files are written under `tmp/` inside the i
 
 ## Developer Setup
 
+Contributor guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+
 ```bash
 git clone https://github.com/Mr0b01/ae-auto-subtitles.git
 cd ae-auto-subtitles
@@ -259,6 +265,8 @@ defaults write com.adobe.CSXS.10 PlayerDebugMode 1
 
 ## Build Installer
 
+Release checklist: [docs/release-checklist.md](docs/release-checklist.md)
+
 ```bash
 zsh packaging/build_pkg.sh
 ```
@@ -272,9 +280,7 @@ dist/AE-Auto-Subtitles-Installer-<version>.pkg
 ## Verification
 
 ```bash
-node --check panel/main.js
-python -m py_compile backend/transcribe.py backend/postprocess.py backend/io_json.py scripts/native_qa.py scripts/verify_ae_layout.py scripts/verify_ae_timing.py
-python -m unittest discover -s tests
+sh scripts/preflight.sh
 python "$HOME/Library/Application Support/Adobe/CEP/extensions/com.airliner.aeautosubtitles/scripts/native_qa.py"
 ```
 

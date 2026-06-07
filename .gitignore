@@ -13,6 +13,7 @@ dist/
 
 # Runtime/test artifacts
 tmp/
+samples/
 *.log
 test_out.log
 test_err.log
