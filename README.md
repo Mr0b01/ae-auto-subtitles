@@ -33,7 +33,11 @@
 </p>
 
 <p align="center">
-  <img alt="AED Subtitles preview" src="docs/assets/aed-subtitles-hero.svg" width="100%">
+  <img alt="AED Subtitles panel screenshot showing caption preview, quick controls, and color controls" src="docs/assets/aed-subtitles-style-workbench.png" width="100%">
+</p>
+
+<p align="center">
+  <sub>Actual screenshot from the local panel UI. No generated hero art.</sub>
 </p>
 
 ## Download
@@ -43,6 +47,16 @@
 Open the [latest GitHub Release](https://github.com/Mr0b01/ae-auto-subtitles/releases/latest) if you want release notes, checksum details, or older assets.
 
 The installer includes the CEP panel, local Python backend, ExtendScript renderer, bundled ffmpeg, offline Python wheels, and the cached Whisper Turbo model when it is available at build time. If the Turbo model is not bundled, the first transcription can download it automatically.
+
+## Screenshots
+
+<p align="center">
+  <img alt="AED Subtitles full panel screenshot" src="docs/assets/aed-subtitles-panel-overview.png" width="100%">
+</p>
+
+<p align="center">
+  <img alt="AED Subtitles review captions screenshot" src="docs/assets/aed-subtitles-review-captions.png" width="100%">
+</p>
 
 ## Built For
 
