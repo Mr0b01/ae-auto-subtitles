@@ -29,6 +29,7 @@ This file is the running project log for the AE auto-subtitles panel. Keep it cu
 - Public hygiene now checks tracked files for local machine paths, generated/cache artifacts, stale installer links, missing README assets, and missing current release notes.
 - Replaced local-only sample command examples with generic `/path/to/video.mp4` examples and ignored local `samples/` media.
 - Replaced generated README hero art with real screenshots captured from `panel/index.html`: full panel, style workbench, and review captions crops.
+- Added dedicated Reference Text documentation that explains model/reference labels, changed-only apply, reference gaps, and how `Max Chars`, `Max Lines`, `Block Width`, and `Block Scale` affect reviewed captions.
 - Fixed the timeline "red shard staircase" failure in montage comps by making checked `Active comp mix` truly run first. File-backed sources remain available as a manual fast path, but they are no longer auto-checked when comp mix is the default.
 - Root cause verified in active comp `01`: the panel transcribed 9 separate file-backed layers, including short B-roll/audio clips, and accepted an impossible raw item (`19` words in `0.04s`). AE then faithfully created one-frame subtitle layers from that bad JSON.
 - Added backend/postprocess guards that drop punctuation-only transcript items and dense hallucinated captions whose text cannot physically fit in the reported duration.

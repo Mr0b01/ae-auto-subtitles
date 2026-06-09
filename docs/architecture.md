@@ -34,7 +34,16 @@ After Effects comp
 
 ## Reference Text
 
-Reference text is applied after model transcription. The aligner compares the model transcript against known-correct text, updates changed captions, and marks captions whose text came from reference alignment.
+Reference text is applied after model transcription. The aligner compares the model transcript against known-correct text, updates changed captions, fills missed Whisper gaps, and marks captions whose text came from reference alignment.
+
+The review layer keeps source status visible before rendering:
+
+- model-only captions
+- reference-matched captions
+- reference-changed captions
+- synthetic reference-gap captions
+
+Layout controls such as `Max Chars`, `Max Lines`, `Block Width`, and `Block Scale` are part of the caption document metadata so the reviewed text can be split into blocks before AE layers are created.
 
 ## AE Rendering
 
@@ -44,4 +53,4 @@ Dark backplate and Hug Lines renderers are not the stable default path in the cu
 
 ## QA Boundary
 
-Normal CI runs syntax, unit tests, and public hygiene checks. Real AE layout/timing checks require an installed After Effects environment and are run through Native QA.
+`scripts/preflight.sh` runs public hygiene, syntax checks, and unit smoke tests. Real AE layout/timing checks require an installed After Effects environment and are run through Native QA.

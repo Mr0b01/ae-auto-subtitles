@@ -49,6 +49,17 @@ This usually means the timing pass created impossible durations. Use the comp mi
 
 Reference text fixes words; it does not automatically prove timing is still valid after composition changes. Run `Retiming` before applying layers.
 
+## Reference Text Creates Blocks That Are Too Long
+
+Reference text is split using the same layout controls shown beside the preview:
+
+- lower `Max Chars` to make shorter caption blocks
+- lower `Max Lines` to prevent tall blocks
+- adjust `Block Width` to change wrapping
+- use `Block Scale` when the block shape is right but the rendered size needs to change
+
+After changing these controls, review the caption list again before pressing `Run` or `Apply Changed`.
+
 ## Need Evidence
 
 Use:

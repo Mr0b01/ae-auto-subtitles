@@ -13,6 +13,8 @@
   &nbsp;|&nbsp;
   <a href="docs/troubleshooting.md">Troubleshooting</a>
   &nbsp;|&nbsp;
+  <a href="docs/reference-text.md">Reference Text</a>
+  &nbsp;|&nbsp;
   <a href="docs/architecture.md">Architecture</a>
   &nbsp;|&nbsp;
   <a href="#workflow">Workflow</a>
@@ -90,8 +92,9 @@ Raw SRT imports are not enough for short-form edits. AED Subtitles is built arou
 | Local Whisper Turbo | Faster default transcription without sending edit audio to a web subtitle service. |
 | Active comp mix | Captures every audible enabled layer in the composition. |
 | Review Captions | Lets you inspect text before creating timeline layers. |
-| Reference Text | Replaces model mistakes with known-correct wording. |
-| Apply Changed | Applies only captions that changed after a reference pass. |
+| Reference Text | Uses a known-correct script to fix model mistakes, fill missed speech, and keep the caption timing structure. |
+| Source labels and diffs | Shows which captions are model-only, matched reference, changed by reference, or filled from a Whisper gap. |
+| Apply Changed | Applies only captions that changed after a reference pass, leaving approved layers alone. |
 | Style preview | Keeps font, size, block width, offset, and preset choices in one panel. |
 | Native AE layers | Creates editable text layers instead of a baked video overlay. |
 | Native QA | Runs syntax, unit, real AE layout, and real AE timing checks. |
@@ -143,6 +146,22 @@ Manual file-backed sources are still available when you intentionally want to tr
 ### 3. Correct With Reference Text
 
 Paste the known-correct script when the model gets words wrong. The aligner keeps the transcript timing where it can, fills missing Whisper gaps from the reference, and marks captions that changed.
+
+Reference Text guide: [docs/reference-text.md](docs/reference-text.md)
+
+Reference-aware review shows:
+
+- `Model`: the caption is still what Whisper produced.
+- `Reference match`: Whisper text matched the reference text.
+- `Reference`: caption text was corrected or filled from the reference text.
+- `Reference gap`: Whisper missed a span, so timing was filled using the reference text.
+
+The same pass respects layout controls before AE layers are created:
+
+- `Max Chars`: how much text can fit in one caption line/block.
+- `Max Lines`: how many lines can appear in one caption block.
+- `Block Width`: the visual width used for wrapping and previewing captions.
+- `Block Scale`: scales the already-formed caption block without changing the wording.
 
 ### 4. Apply Only What Changed
 
